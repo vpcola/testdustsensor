@@ -65,6 +65,9 @@ typedef enum {
 dustsensor_parser_handle_t dustsensor_parser_init(const dustsensor_parser_config_t *config);
 
 esp_err_t dustsensor_parser_deinit(dustsensor_parser_handle_t dustsensor_hdl);
+esp_err_t dustsensor_parser_add_handler(dustsensor_parser_handle_t dustsensor_hdl, esp_event_handler_t event_handler, void *handler_args);
+esp_err_t dustsensor_parser_remove_handler(dustsensor_parser_handle_t dustsensor_hdl, esp_event_handler_t event_handler);
+
 
 #ifdef __cplusplus
 }

@@ -211,3 +211,16 @@ esp_err_t dustsensor_parser_deinit(dustsensor_parser_handle_t dustsensor_hdl)
 }
 
 
+esp_err_t dustsensor_parser_add_handler(dustsensor_parser_handle_t dustsensor_hdl, esp_event_handler_t event_handler, void *handler_args)
+{
+    esp_dustsensor_t *esp_dustsensor = (esp_dustsensor_t *)dustsensor_hdl;
+    return esp_event_handler_register_with(esp_dustsensor->event_loop_hdl, ESP_DUSTSENSOR_EVENT, ESP_EVENT_ANY_ID,
+            event_handler, handler_args);
+}
+
+
+esp_err_t dustsensor_parser_remove_handler(dustsensor_parser_handle_t dustsensor_hdl, esp_event_handler_t event_handler)
+{
+    esp_dustsensor_t *esp_dustsensor = (esp_dustsensor_t *)dustsensor_hdl;
+    return esp_event_handler_unregister_with(esp_dustsensor->event_loop_hdl, ESP_DUSTSENSOR_EVENT, ESP_EVENT_ANY_ID, event_handler);
+}
