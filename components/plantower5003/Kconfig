@@ -1,0 +1,24 @@
+menu "Dustsensor Parser"
+
+    config DUSTSENSOR_PARSER_RING_BUFFER_SIZE
+        int "NMEA Parser Ring Buffer Size"
+        range 0 2048
+        default 1024
+        help
+            Size of the ring buffer used for UART Rx channel.
+
+    config DUSTSENSOR_PARSER_TASK_STACK_SIZE
+        int "DUSTSENSOR Parser Task Stack Size"
+        range 0 4096
+        default 2048
+        help
+            Stack size of DUSTSENSOR Parser task.
+
+    config DUSTSENSOR_PARSER_TASK_PRIORITY
+        int "DUSTSENSOR Parser Task Priority"
+        range 0 24
+        default 2
+        help
+            Priority of DUSTSENSOR Parser task.
+
+endmenu
