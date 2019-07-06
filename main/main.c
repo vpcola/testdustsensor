@@ -51,8 +51,6 @@ void app_main()
 
     /* NMEA parser configuration */
     dustsensor_parser_config_t config = DUSTSENSOR_PARSER_CONFIG_DEFAULT();
-    config.uart.uart_port = UART_NUM_1;
-    config.uart.rx_pin = 21; // Change GPI pin
     /* init NMEA parser library */
     dustsensor_parser_handle_t dustsensor_hdl = dustsensor_parser_init(&config);
     /* register event handler for NMEA parser library */

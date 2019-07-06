@@ -31,8 +31,8 @@ static esp_err_t dustsensor_decode(esp_dustsensor_t *esp_dustsensor, size_t len)
 {
     // TODO: Implement the decoder
     const uint8_t *d = esp_dustsensor->buffer;
-
-    for(int i = 0; i  < len; i++)
+	int i = 0;
+    for(i = 0; i  < len; i++)
     {
         printf("%X", d[i]); // for now just print the character
 
@@ -41,9 +41,27 @@ static esp_err_t dustsensor_decode(esp_dustsensor_t *esp_dustsensor, size_t len)
         // esp_dustsensor->parent.pm25data = <data from sensor>;
         // esp_event_post_to(esp_dustsensor->event_loop_hdl, ESP_DUSTSENSOR_EVENT, SENSOR_UPDATE,
         //          &(esp_dustsensor->parent), sizeof(dustsensor_t), 100 / portTICK_PERIOD_MS);
-    }
 
+    }
     printf("\n");
+
+	// Check we have 'BM' as the header
+	if ((d[0] == 0x42) && (d[1] == 0x4D))
+	{
+		int checksum = 0;
+		// Check the frame length
+		if (len != 32) return ESP_FAIL; // Data should be 32 bytes in length
+		
+		printf("Data 3 = %x, data 4 = %x\n", d[3], d[4]);
+		uint16_t framesiz = (((uint16_t) d[3]) << 8 ) | (d[4] & 0xFF);
+
+		// total all 30 bytes
+		for(i = 0; i < 30; i++)
+			checksum += d[i];
+
+		printf("Frame size = %x, checksum = %X\n", framesiz, checksum);
+			
+	}
 
     return ESP_OK;
 } 
@@ -59,10 +77,8 @@ static void esp_handle_uart_pattern(esp_dustsensor_t *esp_dustsensor)
     if (pos != -1) {
         /* read one line(include '\n') */
         int read_len = uart_read_bytes(esp_dustsensor->uart_port, esp_dustsensor->buffer, pos, 100 / portTICK_PERIOD_MS);
-        /* make sure the line is a standard string */
-        esp_dustsensor->buffer[read_len] = '\0';
         /* Send new line to handle */
-        if (dustsensor_decode(esp_dustsensor, read_len + 1) != ESP_OK) {
+        if (dustsensor_decode(esp_dustsensor, read_len) != ESP_OK) {
             ESP_LOGW(DUSTSENSOR_TAG, "DUSTSENSOR decode line failed");
         }
     } else {
