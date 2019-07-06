@@ -1,14 +1,21 @@
 menu "Example Configuration"
 
-    config BLINK_GPIO
-        int "Blink GPIO number"
-        range 0 34
-        default 5
-        help
-            GPIO number (IOxx) to blink on and off.
+	choice DUSTSENSOR_UART_PORT
+		prompt "Select the UART Port. Note: UART0 is disabled, this is used for debugging"
+		default DUSTSENSOR_PORT_UART_1
 
-            Some GPIOs are used for other purposes (flash connections, etc.) and cannot be used to blink.
+		config DUSTSENSOR_UART_PORT_1
+			bool "UART1"
 
-            GPIOs 35-39 are input-only so cannot be used as outputs.
+		config DUSTSENSOR_UART_PORT_2
+			bool "UART2"
+	endchoice
+
+	config DUSTSENSOR_UART_RX_PIN 
+		int "UART GPIO number"
+		range 0 34
+		default 2 
+		help
+			GPIO number for the UART RX pin.
 
 endmenu

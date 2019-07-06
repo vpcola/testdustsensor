@@ -18,6 +18,14 @@
 */
 #define BLINK_GPIO CONFIG_BLINK_GPIO
 
+#if defined(CONFIG_DUSTSENSOR_UART_PORT_1)
+#define DUSTSENSOR_UART_PORT UART_NUM_1
+#elif defined(CONFIG_DUSTSENSOR_UART_PORT_2)
+#define DUSTSENSOR_UART_PORT UART_NUM_2
+#else
+#error Please select the UART Port used by the dust sensor!
+#endif
+
 static void dustsensor_event_handler(void *event_handler_arg, esp_event_base_t event_base, int32_t event_id, void *event_data)
 {
     dustsensor_t *sensor = NULL;
@@ -46,19 +54,10 @@ static void dustsensor_event_handler(void *event_handler_arg, esp_event_base_t e
 
 void app_main()
 {
-    /* Configure the IOMUX register for pad BLINK_GPIO (some pads are
-       muxed to GPIO on reset already, but some default to other
-       functions and need to be switched to GPIO. Consult the
-       Technical Reference for a list of pads and their default
-       functions.)
-    */
-    gpio_pad_select_gpio(BLINK_GPIO);
-    /* Set the GPIO as a push/pull output */
-    gpio_set_direction(BLINK_GPIO, GPIO_MODE_OUTPUT);
-
-
     /* NMEA parser configuration */
     dustsensor_parser_config_t config = DUSTSENSOR_PARSER_CONFIG_DEFAULT();
+	config.uart.uart_port = DUSTSENSOR_UART_PORT;
+	config.uart.rx_pin = CONFIG_DUSTSENSOR_UART_RX_PIN;
     /* init NMEA parser library */
     dustsensor_parser_handle_t dustsensor_hdl = dustsensor_parser_init(&config);
     /* register event handler for NMEA parser library */
@@ -66,13 +65,6 @@ void app_main()
 
 
     while(1) {
-        /* Blink off (output low) */
-	printf("Turning off the LED\n");
-        gpio_set_level(BLINK_GPIO, 0);
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
-        /* Blink on (output high) */
-	printf("Turning on the LED\n");
-        gpio_set_level(BLINK_GPIO, 1);
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 
