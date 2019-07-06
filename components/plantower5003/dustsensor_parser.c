@@ -29,41 +29,45 @@ typedef struct {
 
 static esp_err_t dustsensor_decode(esp_dustsensor_t *esp_dustsensor, size_t len)
 {
-    // TODO: Implement the decoder
     const uint8_t *d = esp_dustsensor->buffer;
 	int i = 0;
-    for(i = 0; i  < len; i++)
-    {
-        printf("%X", d[i]); // for now just print the character
-
-        // TODO: If data is detected, fill parent with data and post a data to event handlers
-        // esp_dustsensor->parent.pm10data = <data from sensor>;
-        // esp_dustsensor->parent.pm25data = <data from sensor>;
-        // esp_event_post_to(esp_dustsensor->event_loop_hdl, ESP_DUSTSENSOR_EVENT, SENSOR_UPDATE,
-        //          &(esp_dustsensor->parent), sizeof(dustsensor_t), 100 / portTICK_PERIOD_MS);
-
-    }
-    printf("\n");
 
 	// Check we have 'BM' as the header
 	if ((d[0] == 0x42) && (d[1] == 0x4D))
 	{
-		int checksum = 0;
+		uint16_t checksum = 0;
 		// Check the frame length
-		if (len != 32) return ESP_FAIL; // Data should be 32 bytes in length
-		
-		printf("Data 3 = %x, data 4 = %x\n", d[3], d[4]);
-		uint16_t framesiz = (((uint16_t) d[3]) << 8 ) | (d[4] & 0xFF);
+		if (len != 32) return ESP_ERR_INVALID_SIZE; // Data should be 32 bytes in length
 
-		// total all 30 bytes
+		// Frame size should be 28 bytes!
+		// uint16_t framesiz = (((uint16_t) d[2]) << 8 ) | (d[3] & 0xFF);
+
+		// total all 30 bytes for checksum
 		for(i = 0; i < 30; i++)
 			checksum += d[i];
 
-		printf("Frame size = %x, checksum = %X\n", framesiz, checksum);
-			
+		uint16_t chkdata = (d[30] << 8) | (d[31] & 0xFF);
+
+		if (checksum == chkdata)
+		{
+			esp_dustsensor->parent.pm1 = (d[4] << 8) | (d[5] & 0xFF);
+			esp_dustsensor->parent.pm25 = (d[6] << 8) | (d[7] & 0xFF);
+			esp_dustsensor->parent.pm10 = (d[8] << 8) | (d[9] & 0xFF);
+		    esp_dustsensor->parent.pm1_atmospheric = (d[10] << 8) | (d[11] & 0xFF);
+			esp_dustsensor->parent.pm25_atmospheric = (d[12] << 8) | (d[13] & 0xFF);
+			esp_dustsensor->parent.pm10_atmospheric = (d[14] << 8) | (d[15] & 0xFF);	
+
+			// Post sensor update event 
+			esp_event_post_to(esp_dustsensor->event_loop_hdl, ESP_DUSTSENSOR_EVENT, SENSOR_UPDATE,
+					&(esp_dustsensor->parent), sizeof(dustsensor_t), 100 / portTICK_PERIOD_MS);
+
+			return ESP_OK;
+		}else
+			return ESP_ERR_INVALID_CRC;
+
 	}
 
-    return ESP_OK;
+    return ESP_ERR_INVALID_SIZE;
 } 
 
 static void esp_handle_uart_pattern(esp_dustsensor_t *esp_dustsensor)

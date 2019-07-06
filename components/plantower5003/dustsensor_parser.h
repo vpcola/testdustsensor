@@ -26,8 +26,12 @@ extern "C" {
 ESP_EVENT_DECLARE_BASE(ESP_DUSTSENSOR_EVENT);
 
 typedef struct {
-    int pm10data;
-    int pm25data;
+    uint16_t pm1;
+    uint16_t pm25;
+	uint16_t pm10;
+	uint16_t pm1_atmospheric;
+	uint16_t pm25_atmospheric;
+	uint16_t pm10_atmospheric;
 } dustsensor_t;
 
 typedef struct {

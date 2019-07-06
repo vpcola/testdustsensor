@@ -24,8 +24,16 @@ static void dustsensor_event_handler(void *event_handler_arg, esp_event_base_t e
     switch (event_id) {
     case SENSOR_UPDATE:
         sensor = (dustsensor_t *)event_data;
-        // TODO: 
         // Handle the data from the sensor here
+		printf("Concentration Unit (Standard):\nPM1.0 = %d ug/cum, PM2.5 = %d ug/cum, PM10 = %d ug/cum\n", 
+				sensor->pm1,
+				sensor->pm25,
+				sensor->pm10);
+		printf("Concentration Unit (Environmental):\nPM1.0 = %d ug/cum, PM2.5 = %d ug/cum, PM10 = %d ug/cum\n", 
+				sensor->pm1_atmospheric,
+				sensor->pm25_atmospheric,
+				sensor->pm10_atmospheric);
+
         break;
     case SENSOR_UNKNOWN:
         /* print unknown statements */
